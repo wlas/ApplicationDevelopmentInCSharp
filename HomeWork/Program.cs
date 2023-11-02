@@ -1,35 +1,53 @@
-﻿using HomeWork;
-
-var value = new Bits(9);
-
-var a = "";
-try
+﻿int[,] l = new int[,]
 {
-    for (int j = 0; j < 8; j++)
+    {1, 1, 1, 1, 1, 1, 1 },
+    {1, 0, 0, 0, 0, 0, 1 },
+    {1, 0, 1, 1, 1, 0, 1 },
+    {0, 0, 0, 0, 1, 0, 2 },
+    {1, 1, 0, 0, 1, 1, 1 },
+    {1, 1, 1, 1, 1, 1, 1 },
+    {1, 1, 1, 1, 1, 1, 1 }
+};
+
+Console.WriteLine($"Найдено выходов: {HasExix(1, 1, l)}");
+
+int HasExix(int startI, int startJ, int[,] l)
+{
+    int ex = 0;
+
+    if (l[startI, startJ] == 1)
     {
-        a += value.GetBit(j) ? 1 : 0;
-
+        Console.WriteLine("Начальная точка находится в стене!");
+        return ex;
     }
-    a = string.Join("", a.Reverse());
 
-    Console.WriteLine(a);
-    Console.WriteLine(value.GetBit(2));
+    var stack = new Stack<Tuple<int, int>>();
+    stack.Push(new(startI, startJ));
 
-    value.SetBit(false, 2);
-    Console.WriteLine(value.Value);
+    while (stack.Count > 0)
+    {
+        var temp = stack.Pop();
+
+        if (l[temp.Item1, temp.Item2] == 2)
+        {            
+            ex++;
+        }
+
+        l[temp.Item1, temp.Item2] = 1;
+
+        if (temp.Item2 > 0 && l[temp.Item1, temp.Item2 - 1] != 1)
+            stack.Push(new(temp.Item1, temp.Item2 - 1)); // вверх
+
+        if (temp.Item2 + 1 < l.GetLength(1) && l[temp.Item1, temp.Item2 + 1] != 1)
+            stack.Push(new(temp.Item1, temp.Item2 + 1)); // низ
+
+        if (temp.Item1 > 0 && l[temp.Item1 - 1, temp.Item2] != 1)
+            stack.Push(new(temp.Item1 - 1, temp.Item2)); // лево
+
+        if (temp.Item1 + 1 < l.GetLength(0) && l[temp.Item1 + 1, temp.Item2] != 1)
+            stack.Push(new(temp.Item1 + 1, temp.Item2)); // право
+    }
+    return ex;
 }
-catch (Exception ex)
-{
-    Console.WriteLine(ex.Message);
-}
-
-long l = 3243;
-int i = 456;
-short s = 45;
-byte b = 2;
-Bits resultL = l;
-Bits resultI = i;
-Bits resultS = s;
-Bits resultB = b;
 
 
