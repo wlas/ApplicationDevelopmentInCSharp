@@ -1,42 +1,62 @@
 ﻿using HomeWork;
 
-var father = new FamilyMember("Иван", Gender.Male, DateOnly.Parse("25.02.1988"));
-var mother = new FamilyMember("Ольга", Gender.Female, DateOnly.Parse("02.04.1989"));
-father.AddSpouse(mother);
-mother.AddSpouse(father);
+/* Доработайте программу калькулятор реализовав выбор действий и вывод результатов на экран в цикле так 
+ * чтобы калькулятор мог работать до тех пор пока пользователь не нажмет отмена или введёт пустую строку. */
 
-var child1 = new FamilyMember("Миша", Gender.Male, DateOnly.Parse("11.10.2018"));
-child1.SetParents(father, mother);
-father.AddChild(child1);
-mother.AddChild(child1);
+bool work = true;
 
-var child2 = new FamilyMember("Игорь", Gender.Male, DateOnly.Parse("12.05.2019"));
-child2.SetParents(father, mother);
-father.AddChild(child2);
-mother.AddChild(child2);
+var calc = new Calc();
+calc.MyEventHandler += Calc_MyEventHandler;
 
+string action;
 
-var father2 = new FamilyMember("Саша", Gender.Male, DateOnly.Parse("05.07.1982"));
-var mother2 = new FamilyMember("Света", Gender.Female, DateOnly.Parse("02.04.1986"));
-father2.AddSpouse(mother2);
-mother2.AddSpouse(father2);
+do
+{
+    Console.WriteLine("Выберите действие: +, -, *, /, q (для выхода)");
 
-father.SetParents(father2, mother2);
-mother2.AddChild(father);
-father2.AddChild(father);
+    action = Console.ReadLine();
 
-mother = new FamilyMember("Ирина", Gender.Female, DateOnly.Parse("01.04.1981"));
-father.AddSpouse(mother);
-mother.AddSpouse(father);
+    if (action == "+" || action == "-" || action == "*" || action == "/")
 
-var child3 = new FamilyMember("Тимур", Gender.Male, DateOnly.Parse("11.10.2018"));
-child3.SetParents(father, mother);
-father.AddChild(child3);
-mother.AddChild(child3);
+    {
+        Console.Write("Введите первое число: ");
+        calc.Result = int.Parse(Console.ReadLine());
+        Console.Write("Введите второе число: ");
 
-var child4 = new FamilyMember("Алла", Gender.Female, DateOnly.Parse("01.04.2014"));
-child4.SetParents(father,mother);
-father.AddChild(child4);
-mother.AddChild(child4);
+        int num2 = int.Parse(Console.ReadLine());
 
-FamilyMember.PrintTree(father2);
+        switch (action)
+
+        {
+            case "+":
+                calc.Sum(num2);
+                break;
+            case "-":
+                calc.Sub(num2);
+                break;
+            case "*":
+                calc.Multy(num2);
+                break;
+            case "/":
+                calc.Divide(num2);
+                break;
+            default:
+                Console.WriteLine("Некорректное действие!");
+                break;
+
+        }
+    }
+    else if (action != "q" && action != "")
+    {
+        Console.WriteLine("Некорректное действие!");
+    }
+
+} while (action != "q" && action != "");
+
+Console.WriteLine("Программа завершена.");
+
+void Calc_MyEventHandler(object? sender, EventArgs e)
+{
+    if (sender is Calc)
+        Console.WriteLine("Результат: " + ((Calc)sender).Result);
+}
