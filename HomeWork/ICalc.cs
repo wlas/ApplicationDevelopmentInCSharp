@@ -3,10 +3,10 @@
     public interface ICalc
     {
         double Result { get; set; }
-        void Sum(int x);
-        void Sub(int x);
-        void Multy(int x);
-        void Divide(int x);
+        void Sum(double x);
+        void Sub(double x);
+        void Multy(double x);
+        void Divide(double x);
         void CancelLast();
 
         event EventHandler<EventArgs> MyEventHandler;

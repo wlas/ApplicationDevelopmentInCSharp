@@ -1,9 +1,13 @@
 ﻿using HomeWork;
 
-/* Доработайте программу калькулятор реализовав выбор действий и вывод результатов на экран в цикле так 
- * чтобы калькулятор мог работать до тех пор пока пользователь не нажмет отмена или введёт пустую строку. */
+/* Доработайте класс калькулятора способным работать как с целочисленными так и с дробными числами. (возможно стоит задействовать перегрузку операций).
+//заменить Convert.ToDouble на собственный DoubleTryPars и обрабатываем ошибку
+//проверить что введенное число небыло отрицательное (вывести ошибку Exeption , отловить Catch)
+// сумма не может быть отрицательной (при делении и вычитании) */
 
 bool work = true;
+
+DoubleTryPars doubleTryPars = new();
 
 var calc = new Calc();
 calc.MyEventHandler += Calc_MyEventHandler;
@@ -20,10 +24,10 @@ do
 
     {
         Console.Write("Введите первое число: ");
-        calc.Result = int.Parse(Console.ReadLine());
+        calc.Result = doubleTryPars.DoubleTryParse(Console.ReadLine());
         Console.Write("Введите второе число: ");
 
-        int num2 = int.Parse(Console.ReadLine());
+        double num2 = doubleTryPars.DoubleTryParse(Console.ReadLine());
 
         switch (action)
 
@@ -37,13 +41,27 @@ do
             case "*":
                 calc.Multy(num2);
                 break;
-            case "/":
-                calc.Divide(num2);
+            case "/":                
+                try
+                {
+                    calc.Divide(num2);
+                }
+                catch (CalculatorDivideByZeroException ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+                catch (CalculatorExeption ex)
+                {
+                    Console.WriteLine(ex);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
                 break;
             default:
                 Console.WriteLine("Некорректное действие!");
                 break;
-
         }
     }
     else if (action != "q" && action != "")

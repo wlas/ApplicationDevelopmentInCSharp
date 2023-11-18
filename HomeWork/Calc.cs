@@ -13,30 +13,33 @@
         }
 
 
-        public void Divide(int x)
-        {
-            Result /= x;
+        public void Divide(double x)
+        {            
+            if (Result != 0)
+            {
+                Result /= x;
+            }
+            else
+            {
+                throw new CalculatorDivideByZeroException("Ошибка деления на ноль.");               
+            }
             PrintResult();
         }
-
-        public void Multy(int x)
+        public void Multy(double x)
         {
             Result *= x;
             PrintResult();
         }
-
-        public void Sub(int x)
+        public void Sub(double x)
         {
             Result -= x;
             PrintResult();
         }
-
-        public void Sum(int x)
+        public void Sum(double x)
         {
             Result += x;
             PrintResult();
         }
-
         public void CancelLast()
         {
             if (LastResult.TryPop(out double res))
