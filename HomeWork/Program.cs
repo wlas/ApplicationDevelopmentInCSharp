@@ -1,42 +1,80 @@
 ﻿using HomeWork;
 
-var father = new FamilyMember("Иван", Gender.Male, DateOnly.Parse("25.02.1988"));
-var mother = new FamilyMember("Ольга", Gender.Female, DateOnly.Parse("02.04.1989"));
-father.AddSpouse(mother);
-mother.AddSpouse(father);
+/* Доработайте класс калькулятора способным работать как с целочисленными так и с дробными числами. (возможно стоит задействовать перегрузку операций).
+//заменить Convert.ToDouble на собственный DoubleTryPars и обрабатываем ошибку
+//проверить что введенное число небыло отрицательное (вывести ошибку Exeption , отловить Catch)
+// сумма не может быть отрицательной (при делении и вычитании) */
 
-var child1 = new FamilyMember("Миша", Gender.Male, DateOnly.Parse("11.10.2018"));
-child1.SetParents(father, mother);
-father.AddChild(child1);
-mother.AddChild(child1);
+bool work = true;
 
-var child2 = new FamilyMember("Игорь", Gender.Male, DateOnly.Parse("12.05.2019"));
-child2.SetParents(father, mother);
-father.AddChild(child2);
-mother.AddChild(child2);
+DoubleTryPars doubleTryPars = new();
 
+var calc = new Calc();
+calc.MyEventHandler += Calc_MyEventHandler;
 
-var father2 = new FamilyMember("Саша", Gender.Male, DateOnly.Parse("05.07.1982"));
-var mother2 = new FamilyMember("Света", Gender.Female, DateOnly.Parse("02.04.1986"));
-father2.AddSpouse(mother2);
-mother2.AddSpouse(father2);
+string action;
 
-father.SetParents(father2, mother2);
-mother2.AddChild(father);
-father2.AddChild(father);
+do
+{
+    Console.WriteLine("Выберите действие: +, -, *, /, q (для выхода)");
 
-mother = new FamilyMember("Ирина", Gender.Female, DateOnly.Parse("01.04.1981"));
-father.AddSpouse(mother);
-mother.AddSpouse(father);
+    action = Console.ReadLine();
 
-var child3 = new FamilyMember("Тимур", Gender.Male, DateOnly.Parse("11.10.2018"));
-child3.SetParents(father, mother);
-father.AddChild(child3);
-mother.AddChild(child3);
+    if (action == "+" || action == "-" || action == "*" || action == "/")
 
-var child4 = new FamilyMember("Алла", Gender.Female, DateOnly.Parse("01.04.2014"));
-child4.SetParents(father,mother);
-father.AddChild(child4);
-mother.AddChild(child4);
+    {
+        Console.Write("Введите первое число: ");
+        calc.Result = doubleTryPars.DoubleTryParse(Console.ReadLine());
+        Console.Write("Введите второе число: ");
 
-FamilyMember.PrintTree(father2);
+        double num2 = doubleTryPars.DoubleTryParse(Console.ReadLine());
+
+        switch (action)
+
+        {
+            case "+":
+                calc.Sum(num2);
+                break;
+            case "-":
+                calc.Sub(num2);
+                break;
+            case "*":
+                calc.Multy(num2);
+                break;
+            case "/":                
+                try
+                {
+                    calc.Divide(num2);
+                }
+                catch (CalculatorDivideByZeroException ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+                catch (CalculatorExeption ex)
+                {
+                    Console.WriteLine(ex);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
+                break;
+            default:
+                Console.WriteLine("Некорректное действие!");
+                break;
+        }
+    }
+    else if (action != "q" && action != "")
+    {
+        Console.WriteLine("Некорректное действие!");
+    }
+
+} while (action != "q" && action != "");
+
+Console.WriteLine("Программа завершена.");
+
+void Calc_MyEventHandler(object? sender, EventArgs e)
+{
+    if (sender is Calc)
+        Console.WriteLine("Результат: " + ((Calc)sender).Result);
+}
