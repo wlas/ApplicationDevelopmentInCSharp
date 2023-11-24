@@ -1,42 +1,100 @@
-﻿using HomeWork;
+﻿using System.Reflection;
+using System.Text;
 
-var father = new FamilyMember("Иван", Gender.Male, DateOnly.Parse("25.02.1988"));
-var mother = new FamilyMember("Ольга", Gender.Female, DateOnly.Parse("02.04.1989"));
-father.AddSpouse(mother);
-mother.AddSpouse(father);
+namespace HomeWork
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
 
-var child1 = new FamilyMember("Миша", Gender.Male, DateOnly.Parse("11.10.2018"));
-child1.SetParents(father, mother);
-father.AddChild(child1);
-mother.AddChild(child1);
+            var v = CreateTestClassInstance(1, 11, "ssad", 3, new char[] { '4', '3', '8', '2' }, new char[] { 'f', 'g', 'k', 'i' });
 
-var child2 = new FamilyMember("Игорь", Gender.Male, DateOnly.Parse("12.05.2019"));
-child2.SetParents(father, mother);
-father.AddChild(child2);
-mother.AddChild(child2);
+            string str = ObjectToString(v);
+            Console.WriteLine(str);
+            object str2 = StringToObject(str);
+        }
+        public static TestClass CreateTestClassInstance(int i, int ii, string s, decimal d, char[] c, char[] cc)
+        {
+            var testClassType = typeof(TestClass);
+            var testClass = Activator.CreateInstance(testClassType) as TestClass;
+
+            var testClassTwo = Activator.CreateInstance(testClassType, new object[] { i });
+
+            var testClassThird = Activator.CreateInstance(testClassType, new object[] { i, ii, s, d, c, cc });
+
+            return testClassThird as TestClass;
+        }
+        public static string ObjectToString(object obj)
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+            var type = obj.GetType();
+            stringBuilder.Append(type.ToString() + "\n");
+            stringBuilder.Append(type.Assembly + "\n");
+            stringBuilder.Append(type.Name + "\n");
+            var properties = type.GetProperties(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+            foreach (var item in properties)
+            {
+                var value = item.GetValue(obj);
+
+                stringBuilder.Append(GetPropertyName(item) + ":");
+                if (item.PropertyType == typeof(char[]))
+                {
+                    stringBuilder.Append(new String(value as char[]) + "\n");
+                }
+                else
+                {
+                    stringBuilder.Append(value + "\n");
+                }
+            }
+
+            return stringBuilder.ToString();
+        }
 
 
-var father2 = new FamilyMember("Саша", Gender.Male, DateOnly.Parse("05.07.1982"));
-var mother2 = new FamilyMember("Света", Gender.Female, DateOnly.Parse("02.04.1986"));
-father2.AddSpouse(mother2);
-mother2.AddSpouse(father2);
+        private static string GetPropertyName(PropertyInfo property)
+        {
+            var customNameAttribute = (CustomNameAttribute)Attribute.GetCustomAttribute(property, typeof(CustomNameAttribute));
+            return customNameAttribute != null ? customNameAttribute.CustomFieldName : property.Name;
+        }
 
-father.SetParents(father2, mother2);
-mother2.AddChild(father);
-father2.AddChild(father);
 
-mother = new FamilyMember("Ирина", Gender.Female, DateOnly.Parse("01.04.1981"));
-father.AddSpouse(mother);
-mother.AddSpouse(father);
+        public static object StringToObject(string endString)
+        {
+            string[] str = endString.Split("\n");
+            var typeName = str[2];
+            var assemblyName = str[1];
+            var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName == assemblyName);
+            if (assembly != null)
+            {
+                var type = assembly.GetTypes().FirstOrDefault(t => t.FullName == typeName);
+                if (type != null)
+                {
+                    var obj = Activator.CreateInstance(type);
+                    var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+                    for (int i = 3; i < str.Length - 1; i++)
+                    {
+                        var propertyString = str[i].Split(":");
+                        var propertyName = propertyString[0];
+                        var propertyValue = propertyString[1];
+                        var property = properties.FirstOrDefault(p => GetPropertyName(p) == propertyName.Trim());  // Используем вспомогательный метод для получения имени поля
+                        if (property != null)
+                        {
+                            if (property.PropertyType == typeof(int))
+                            {
+                                property.SetValue(obj, int.Parse(propertyValue.Trim()));
+                            }
+                            else if (property.PropertyType == typeof(string))
+                            {
+                                property.SetValue(obj, propertyValue.Trim());
+                            }
 
-var child3 = new FamilyMember("Тимур", Gender.Male, DateOnly.Parse("11.10.2018"));
-child3.SetParents(father, mother);
-father.AddChild(child3);
-mother.AddChild(child3);
-
-var child4 = new FamilyMember("Алла", Gender.Female, DateOnly.Parse("01.04.2014"));
-child4.SetParents(father,mother);
-father.AddChild(child4);
-mother.AddChild(child4);
-
-FamilyMember.PrintTree(father2);
+                        }
+                    }
+                    return obj;
+                }
+            }
+            return null;
+        }
+    }
+}
