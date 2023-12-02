@@ -1,42 +1,70 @@
-﻿using HomeWork;
+﻿using System.Text.Json;
+using System.Xml;
 
-var father = new FamilyMember("Иван", Gender.Male, DateOnly.Parse("25.02.1988"));
-var mother = new FamilyMember("Ольга", Gender.Female, DateOnly.Parse("02.04.1989"));
-father.AddSpouse(mother);
-mother.AddSpouse(father);
+namespace HomeWork
+{
+    class Program
+    {
+        /* 
+            Напишите приложение, конвертирующее произвольный JSON в XML. Используйте JsonDocument.
+        */
+        static void Main(string[] args)
+        {
+            string jsonData = "{\"VDD\": 44,\"REAL\": 0,\"Perem\": 1,\"ID\": \"_6QI0HB878014\",\"ND\": \"31426\",\"DD\": \"2023-10-16T00:00:00\",\"ORGANIZ\": 1,\"ORG_1C\": \"000002575\",\"CM_1C\": \"00000057345\"}";
 
-var child1 = new FamilyMember("Миша", Gender.Male, DateOnly.Parse("11.10.2018"));
-child1.SetParents(father, mother);
-father.AddChild(child1);
-mother.AddChild(child1);
+            // Конвертирование JSON в XML
+            var xmlData = ConvertJsonToXml(jsonData);
 
-var child2 = new FamilyMember("Игорь", Gender.Male, DateOnly.Parse("12.05.2019"));
-child2.SetParents(father, mother);
-father.AddChild(child2);
-mother.AddChild(child2);
+            // Сохраняем XML документ в файл
+            xmlData.Save("output.xml");
 
+            // Вывод результата
+            Console.WriteLine(xmlData.OuterXml);
+        }
 
-var father2 = new FamilyMember("Саша", Gender.Male, DateOnly.Parse("05.07.1982"));
-var mother2 = new FamilyMember("Света", Gender.Female, DateOnly.Parse("02.04.1986"));
-father2.AddSpouse(mother2);
-mother2.AddSpouse(father2);
+        static XmlDocument ConvertJsonToXml(string jsonData)
+        {
+            // Парсинг JSON
+            JsonDocument jsonDoc = JsonDocument.Parse(jsonData);
 
-father.SetParents(father2, mother2);
-mother2.AddChild(father);
-father2.AddChild(father);
+            // Создание XML-документа с корневым элементом "root"
+            var xmlDoc = new XmlDocument();
+            var rootElement = xmlDoc.CreateElement("root");
+            xmlDoc.AppendChild(rootElement);
 
-mother = new FamilyMember("Ирина", Gender.Female, DateOnly.Parse("01.04.1981"));
-father.AddSpouse(mother);
-mother.AddSpouse(father);
+            // Рекурсивное добавление элементов в XML
+            ParseJson(xmlDoc, rootElement, jsonDoc.RootElement);
 
-var child3 = new FamilyMember("Тимур", Gender.Male, DateOnly.Parse("11.10.2018"));
-child3.SetParents(father, mother);
-father.AddChild(child3);
-mother.AddChild(child3);
+            // Преобразование XML в строку
+            return xmlDoc;
+        }
 
-var child4 = new FamilyMember("Алла", Gender.Female, DateOnly.Parse("01.04.2014"));
-child4.SetParents(father,mother);
-father.AddChild(child4);
-mother.AddChild(child4);
-
-FamilyMember.PrintTree(father2);
+        static void ParseJson(XmlDocument xmlDoc, XmlNode parentNode, JsonElement jsonElement)
+        {
+            switch (jsonElement.ValueKind)
+            {
+                case JsonValueKind.Object:
+                    foreach (var property in jsonElement.EnumerateObject())
+                    {
+                        var subElement = xmlDoc.CreateElement(property.Name);
+                        parentNode.AppendChild(subElement);
+                        ParseJson(xmlDoc, subElement, property.Value);
+                    }
+                    break;
+                case JsonValueKind.Array:
+                    int index = 1;
+                    foreach (var item in jsonElement.EnumerateArray())
+                    {
+                        var subElement = xmlDoc.CreateElement("item");
+                        parentNode.AppendChild(subElement);
+                        ParseJson(xmlDoc, subElement, item);
+                        index++;
+                    }
+                    break;
+                default:
+                    parentNode.InnerText = jsonElement.ToString();
+                    break;
+            }
+        }
+    }
+}
